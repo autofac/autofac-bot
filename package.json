@@ -23,12 +23,14 @@
     "test:watch": "jest --watch --notify --notifyMode=change --coverage"
   },
   "dependencies": {
+    "node-fetch": "^2.6.0",
     "probot": "^9.5.3"
   },
   "devDependencies": {
     "@types/jest": "^25.1.0",
     "@types/nock": "^11.1.0",
     "@types/node": "^13.1.0",
+    "@types/node-fetch": "^2.5.7",
     "@typescript-eslint/parser": "^2.4.0",
     "eslint-plugin-typescript": "^0.14.0",
     "jest": "^24.9.0",
