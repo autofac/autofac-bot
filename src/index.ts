@@ -1,46 +1,48 @@
 
 import { Application } from 'probot'; // eslint-disable-line no-unused-vars
-import { postBenchmarkRequest, postHelpComment } from './execute.functions';
+import { validCommand } from './command.extractor';
+import { BENCHMARK_COMMAD, HELP_COMMAND, UNKNWON_COMMAND } from './constants';
+import { postBenchmarkRequest } from './execute.functions';
 import { autobotRequest } from './guard.functions';
+import { postHelpComment } from './help.function';
 
 export = (app: Application) => {
-  app.on('*', async _ => {
-    // const pullRequest = context.payload.pull_request;
-    // const issue = context.payload.issue;
-    // console.log(context.payload.issue);
-    // console.log('pullRequest:', pullRequest !== undefined, 'issue', issue !== undefined, context.payload.action);
-  })
-
   app.on('issue_comment', async (context) => {
     if (context.isBot) return;
 
     if (context.payload.action === 'deleted') return;
 
-    if (context.payload.issue.author_association !== 'MEMBER') {
-      console.log('NOT A MEMBER'!);
-      return;
-    }
+    if (context.payload.issue.author_association !== 'MEMBER') return;
 
-    const comment = context.payload.comment.body;
+    if (!autobotRequest(context)) return;
 
-    if (!autobotRequest(comment)) return;
-
-    const words = comment
+    const words = context
+      .payload
+      .comment
+      .body
       .trimLeft()
       .trimRight()
       .split(' ');
 
-    if (words.findIndex(word => word.toLowerCase() === 'help') > -1) {
+    console.log(words);
+
+    if (words?.length < 2) return;
+
+    const command = validCommand(words[1]);
+
+    if (command === UNKNWON_COMMAND) {
+      return;
+    }
+
+    if (command === HELP_COMMAND) {
       await postHelpComment(context);
       return;
     }
 
-    if (words.findIndex(word => word.toLowerCase() === 'benchmark') > -1) {
-      await postBenchmarkRequest(context, words);
+    if (command !== BENCHMARK_COMMAD) {
       return;
     }
 
-    const issueComment = context.issue({ body: words.join('<br />') });
-    await context.github.issues.createComment(issueComment);
+    await postBenchmarkRequest(context, words);
   });
 }

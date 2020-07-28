@@ -1,14 +1,7 @@
 import fetch from 'node-fetch';
 import { Context } from 'probot';
 import { Request } from './benchmark-request.model';
-import { HelpGeneratorService } from './help-generator.service';
 
-export async function postHelpComment(context: Context): Promise<any> {
-    const helpGenerator = new HelpGeneratorService();
-    const issueComment = context.issue({ body: helpGenerator.generate(context.payload.sender.login) });
-    await context.github.issues.createComment(issueComment);
-    return;
-}
 
 export async function postBenchmarkRequest(context: Context, words: string[]): Promise<any> {
     const issue = context.payload.issue;
@@ -68,8 +61,6 @@ export async function postBenchmarkRequest(context: Context, words: string[]): P
     console.log('bench:', benchmarkName);
     console.log('source:', sourceRef);
     console.log('target:', targetRef);
-
-    return;
 
     const request: Request = {
         benchmark: benchmarkName,
