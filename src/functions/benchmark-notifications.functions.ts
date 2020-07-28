@@ -1,7 +1,16 @@
 import { Response } from 'node-fetch';
 import { Context } from 'probot';
 import { VALID_BENCHMARKS } from '../constants';
+import { RunningRequest } from '../models';
 
+export async function notifiyRunningRequest(context: Context, runningRequest: RunningRequest): Promise<void> {
+    const json = JSON.stringify(runningRequest);
+
+    const repositoryInfoRequestFailureComment = context
+        .issue({ body: `Another benchmark request is currently being executed, you need to wait for it to finish. Currently running request:\n\n\`\`\`json\n${json}\n\`\`\`` });
+
+    await context.github.issues.createComment(repositoryInfoRequestFailureComment)
+}
 
 export async function notifyInvalidForIssue(context: Context): Promise<void> {
     const invalidRequestComment = context.issue({ body: 'Command is **invalid** for the given context.\n\n Within an issue you must provide the wanted benchmark, target and source!' })

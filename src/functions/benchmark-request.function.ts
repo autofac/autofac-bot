@@ -1,10 +1,10 @@
 import fetch, { Response } from 'node-fetch';
 import { Context } from 'probot';
-import { BenchmarkRequest, TargetSourceRepository } from '../models';
-import { } from '../models/target-source-repository.model';
+import { BenchmarkRequest, RunningRequest, TargetSourceRepository } from '../models';
 import { validBenchmark, validRequest } from '../validation/benchmark.validation';
 import {
     notifiyInvalidBenchmarkName,
+    notifiyRunningRequest,
     notifyBenchmarkApiUnavailable,
     notifyBenchmarkRequestFailure, notifyBenchmarkResults,
     notifyInvalidForIssue,
@@ -12,8 +12,14 @@ import {
 } from './benchmark-notifications.functions';
 import { loadPullRequestInfo, loadRepositoryInfo } from './issue-request.functions';
 
+let runningRequest: RunningRequest | null = null;
 
 export async function postBenchmarkRequest(context: Context, words: string[]): Promise<void> {
+    if (runningRequest) {
+        await notifiyRunningRequest(context, runningRequest);
+        return;
+    }
+
     if (!validRequest(context, words)) {
         await notifyInvalidForIssue(context);
         return;
@@ -39,11 +45,17 @@ export async function postBenchmarkRequest(context: Context, words: string[]): P
         return;
     }
 
-    const benchmarkRequestResponse = await buildRequest(words, targetSourceRepository, pullRequestInfoResponse);
+    const benchmarkRequest = await buildRequest(words, targetSourceRepository, pullRequestInfoResponse);
 
-    console.log('Sending benchmark request', benchmarkRequestResponse);
+    console.log('Sending benchmark request', benchmarkRequest);
 
-    const benchmarkResponse = await executeBenchmark(benchmarkRequestResponse);
+    runningRequest = {
+        startedAt: new Date(),
+        requester: context.payload.sender.login,
+        request: benchmarkRequest,
+    }
+
+    const benchmarkResponse = await executeBenchmark(benchmarkRequest);
 
     if (!benchmarkResponse) {
         await notifyBenchmarkApiUnavailable(context);
@@ -59,7 +71,7 @@ export async function postBenchmarkRequest(context: Context, words: string[]): P
 }
 
 async function executeBenchmark(benchmarkRequest: BenchmarkRequest): Promise<Response | null> {
-    return await fetch('http://localhost:5000/api/v1/benchmarks', {
+    const response = await fetch('http://localhost:5000/api/v1/benchmarks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json charset=UTF-8' },
         body: JSON.stringify(benchmarkRequest)
@@ -67,6 +79,10 @@ async function executeBenchmark(benchmarkRequest: BenchmarkRequest): Promise<Res
         console.error(requestError);
         return null;
     });
+
+    runningRequest = null;
+
+    return response;
 }
 
 function getTargetAndSourceRef(words: string[]): [string, string] {
@@ -84,8 +100,6 @@ function getTargetAndSourceRef(words: string[]): [string, string] {
 
     return [targetRef, sourceRef];
 }
-
-
 
 async function buildRequest(words: string[], targetSourceRepository: TargetSourceRepository, pullRequestInfoResponse: Response | null = null): Promise<BenchmarkRequest> {
     let [targetRef, sourceRef] = getTargetAndSourceRef(words);
