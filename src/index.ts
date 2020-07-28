@@ -1,10 +1,9 @@
 
-import { Application } from 'probot'; // eslint-disable-line no-unused-vars
-import { validCommand } from './command.extractor';
+import { Application } from 'probot';
 import { BENCHMARK_COMMAD, HELP_COMMAND, UNKNWON_COMMAND } from './constants';
-import { postBenchmarkRequest } from './execute.functions';
-import { autobotRequest } from './guard.functions';
-import { postHelpComment } from './help.function';
+import { postBenchmarkRequest, postHelpComment } from './functions';
+import { autobotRequest } from './guards/guard.functions';
+import { validCommand } from './helper/command.extractor';
 
 export = (app: Application) => {
   app.on('issue_comment', async (context) => {
@@ -12,7 +11,12 @@ export = (app: Application) => {
 
     if (context.payload.action === 'deleted') return;
 
-    if (context.payload.issue.author_association !== 'MEMBER') return;
+    const association = context.payload.issue.author_association;
+
+    if (!(association === 'MEMBER' || association === 'OWNER')) {
+      console.log('HERE', context.payload.issue.author_association);
+      return;
+    }
 
     if (!autobotRequest(context)) return;
 
@@ -23,8 +27,6 @@ export = (app: Application) => {
       .trimLeft()
       .trimRight()
       .split(' ');
-
-    console.log(words);
 
     if (words?.length < 2) return;
 

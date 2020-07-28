@@ -1,5 +1,5 @@
 import { Context } from 'probot';
-import { HelpGeneratorService } from './help-generator.service';
+import { HelpGeneratorService } from '../services/help-generator.service';
 
 export async function postHelpComment(context: Context): Promise<any> {
     const helpGenerator = new HelpGeneratorService();

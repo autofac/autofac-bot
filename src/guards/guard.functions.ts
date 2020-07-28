@@ -1,5 +1,5 @@
 import { Context } from 'probot';
-import { AUTOFAC_BOT_ALIAS } from './constants';
+import { AUTOFAC_BOT_ALIAS } from '../constants';
 
 
 export function autobotRequest(context: Context): boolean {

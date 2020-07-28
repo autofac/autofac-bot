@@ -1,27 +1,6 @@
-import { AUTOFAC_BOT_ALIAS, BENCHMARK_COMMAD } from './constants';
+import { AUTOFAC_BOT_ALIAS, BENCHMARK_COMMAD, VALID_BENCHMARKS } from '../constants';
 
-const VALID_BENCHMARKS = [
-    '* ChildScopeResolveBenchmark',
-    '* ConcurrencyBenchmark',
-    '* ConcurrencyNestedScopeBenchmark',
-    '* KeyedGenericBenchmark',
-    '* KeyedNestedBenchmark',
-    '* KeyedSimpleBenchmark',
-    '* KeylessGenericBenchmark',
-    '* KeylessNestedBenchmark',
-    '* KeylessNestedSharedInstanceBenchmark',
-    '* KeylessNestedLambdaBenchmark',
-    '* KeylessNestedSharedInstanceLambdaBenchmark',
-    '* KeylessSimpleBenchmark',
-    '* KeylessSimpleSharedInstanceBenchmark',
-    '* KeylessSimpleLambdaBenchmark',
-    '* KeylessSimpleSharedInstanceLambdaBenchmark',
-    '* DeepGraphResolveBenchmark',
-    '* EnumerableResolveBenchmark',
-    '* PropertyInjectionBenchmark',
-    '* RootContainerResolveBenchmark',
-    '* OpenGenericBenchmark',
-];
+
 
 const VALID_BENCHMARK_SAMPLES = [
     `* Comparing a commit with a branch \`${AUTOFAC_BOT_ALIAS} ${BENCHMARK_COMMAD} OpenGenericBenchmark commit:d13dfd6 v6\``,

@@ -1,1 +1,0 @@
-- [x] Listen to issue_comment or pull_request comment. Make decision what URLs to use. When Issue -> Autofac URL. When PR -> Autofac URL as Target and PR opener URL as source

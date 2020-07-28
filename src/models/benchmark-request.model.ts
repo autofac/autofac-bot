@@ -1,6 +1,6 @@
 import { Repository } from './repository.request.model';
 
-export interface Request {
+export interface BenchmarkRequest {
   targetRepository: Repository;
   sourceRepository: Repository;
   benchmark: string;
