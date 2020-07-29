@@ -120,11 +120,11 @@ async function buildRequest(words: string[], targetSourceRepository: TargetSourc
     return {
         benchmark: words[2],
         targetRepository: {
-            branch: targetRef,
+            ref: targetRef,
             url: targetSourceRepository.target
         },
         sourceRepository: {
-            branch: sourceRef,
+            ref: sourceRef,
             url: targetSourceRepository.source
         }
     }

@@ -52,7 +52,7 @@ export async function notifyBenchmarkRequestFailure(context: Context, benchmarkR
     const text = await benchmarkRequestResponse.text();
 
     const repositoryInfoRequestFailureComment = context
-        .issue({ body: `**Failed** to request pull-request information. Check out the error for more details:\n\n\`\`\`text\n${text}\n\`\`\`` });
+        .issue({ body: `Benchmark api-service request has **failed**. Check out the error for more details:\n\n\`\`\`text\n${text}\n\`\`\`` });
 
     await context.github.issues.createComment(repositoryInfoRequestFailureComment)
 }

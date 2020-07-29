@@ -1,4 +1,4 @@
 export interface Repository {
-    branch: string;
+    ref: string;
     url: string;
 }
