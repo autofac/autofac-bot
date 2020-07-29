@@ -19,6 +19,7 @@ export const VALID_BENCHMARKS = [
     '* PropertyInjectionBenchmark',
     '* RootContainerResolveBenchmark',
     '* OpenGenericBenchmark',
+    '* MultiConstructorBenchmark',
 ];
 
 export const AUTOFAC_BOT_ALIAS = '@autofac-bot';
