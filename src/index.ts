@@ -1,43 +1,56 @@
-
 import { Application } from 'probot';
+import { HelpGeneratorService } from './builder';
 import { BENCHMARK_COMMAD, HELP_COMMAND, UNKNWON_COMMAND } from './constants';
-import { postBenchmarkRequest, postHelpComment } from './functions';
 import { autobotRequest } from './guards/guard.functions';
-import { validCommand } from './helper/command.extractor';
+import { extractCommand } from './helper/command.extractor';
+import {
+  BenchmarkNotificationsService,
+  BenchmarkRequesterService,
+  HelpRequestService,
+} from './services';
+import { IssueInfoLoaderService } from './services/issue-infoloader.service';
+import { BenchmarkRequestValidation } from './validation/benchmark.validation';
+
+const ISSUE_COMMENT = 'issue_comment';
+
+const DELETE_ACTION = 'deleted';
+
+const MEMBER = 'MEMBER';
+
+const OWNER = 'OWNER';
 
 export = (app: Application) => {
-  app.on('issue_comment', async (context) => {
+  app.on(ISSUE_COMMENT, async (context) => {
     if (context.isBot) return;
 
-    if (context.payload.action === 'deleted') return;
+    if (context.payload.action === DELETE_ACTION) return;
 
     const association = context.payload.issue.author_association;
 
-    if (!(association === 'MEMBER' || association === 'OWNER')) {
-      console.log('HERE', context.payload.issue.author_association);
+    if (!(association === MEMBER || association === OWNER)) {
       return;
     }
 
     if (!autobotRequest(context)) return;
 
-    const words = context
-      .payload
-      .comment
-      .body
+    const words = context.payload.comment.body
       .trimLeft()
       .trimRight()
       .split(' ');
 
     if (words?.length < 2) return;
 
-    const command = validCommand(words[1]);
+    const command = extractCommand(words[1]);
 
     if (command === UNKNWON_COMMAND) {
       return;
     }
 
     if (command === HELP_COMMAND) {
-      await postHelpComment(context);
+      const helpRequestService = new HelpRequestService(
+        new HelpGeneratorService()
+      );
+      await helpRequestService.postHelpComment(context);
       return;
     }
 
@@ -45,6 +58,12 @@ export = (app: Application) => {
       return;
     }
 
-    await postBenchmarkRequest(context, words);
+    const benchmarkRequestService = new BenchmarkRequesterService(
+      new BenchmarkNotificationsService(),
+      new BenchmarkRequestValidation(),
+      new IssueInfoLoaderService()
+    );
+
+    await benchmarkRequestService.postBenchmarkRequest(context, words);
   });
-}
+};

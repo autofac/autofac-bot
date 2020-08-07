@@ -4,13 +4,14 @@ const commandKey = [HELP_COMMAND, BENCHMARK_COMMAD, UNKNWON_COMMAND];
 
 export type Command = typeof commandKey[number];
 
-export function validCommand(command: string): Command {
-    const key = commandKey.find(commandKey => commandKey === command?.toLowerCase());
+export function extractCommand(command: string): Command {
+  const key = commandKey.find(
+    (commandKey) => commandKey === command?.toLowerCase()
+  );
 
-    if (key) {
-        return key;
-    }
+  if (key) {
+    return key;
+  }
 
-    return UNKNWON_COMMAND;
+  return UNKNWON_COMMAND;
 }
-
