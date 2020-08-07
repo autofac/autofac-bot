@@ -1,0 +1,14 @@
+image: Ubuntu
+
+install:
+  - sudo apt-get update
+  - sudo apt-get install curl -y
+  - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+  - nvm install --lts
+  - npm install
+
+build: off
+
+build_script:
+  - chmod +x build.sh
+  - sh build.sh
