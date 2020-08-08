@@ -1,1 +1,1 @@
-export * from './help-generator.service';
+export * from './help-generator.builder';
