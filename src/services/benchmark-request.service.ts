@@ -6,6 +6,8 @@ import {
   RunningRequest,
   TargetSourceRepository,
 } from '../models';
+import { BenchmarkCommand } from '../models/benchmark-command.model';
+import { BenchmarkCommandParser } from '../parser';
 import { BenchmarkRequestValidation } from '../validation/benchmark.validation';
 import { IssueInfoLoaderService } from './issue-infoloader.service';
 
@@ -13,8 +15,9 @@ let runningRequest: RunningRequest | null = null;
 
 export class BenchmarkRequesterService {
   public constructor(
-    private notificationService: BenchmarkNotificationsService,
     private benchmarkRequestValidation: BenchmarkRequestValidation,
+    private benchmarkCommandParser: BenchmarkCommandParser,
+    private notificationService: BenchmarkNotificationsService,
     private issueInfoLoaderService: IssueInfoLoaderService
   ) {}
 
@@ -34,6 +37,7 @@ export class BenchmarkRequesterService {
       await this.notificationService.notifyInvalidForIssue(context);
       return;
     }
+
     if (!this.benchmarkRequestValidation.validBenchmark(words)) {
       await this.notificationService.notifiyInvalidBenchmarkName(
         context,
@@ -41,6 +45,10 @@ export class BenchmarkRequesterService {
       );
       return;
     }
+
+    const benchmarkCommand = this.benchmarkCommandParser.parse(words);
+
+    console.log('BenchmarkCommand', benchmarkCommand);
 
     const repositoryInfoResponse = await this.issueInfoLoaderService.loadRepositoryInfo(
       context
@@ -71,7 +79,7 @@ export class BenchmarkRequesterService {
     }
 
     const benchmarkRequest = await this.buildRequest(
-      words,
+      benchmarkCommand,
       targetSourceRepository,
       pullRequestInfoResponse
     );
@@ -122,50 +130,33 @@ export class BenchmarkRequesterService {
     return response;
   }
 
-  private getTargetAndSourceRef(words: string[]): [string, string] {
-    let targetRef = '';
-    let sourceRef = '';
-
-    if (words.length === 4) {
-      targetRef = words[3];
-    }
-
-    if (words.length === 5) {
-      targetRef = words[3];
-      sourceRef = words[4];
-    }
-
-    return [targetRef, sourceRef];
-  }
-
   private async buildRequest(
-    words: string[],
+    benchmarkCommand: BenchmarkCommand,
     targetSourceRepository: TargetSourceRepository,
     pullRequestInfoResponse: Response | null = null
   ): Promise<BenchmarkRequest> {
-    let [targetRef, sourceRef] = this.getTargetAndSourceRef(words);
-
     if (pullRequestInfoResponse) {
       const pullInfo = await pullRequestInfoResponse.json();
       targetSourceRepository.source = pullInfo.head.repo.clone_url;
 
-      if (sourceRef === '') {
-        sourceRef = pullInfo.head.ref;
+      if (!benchmarkCommand.sourceRef) {
+        benchmarkCommand.sourceRef = pullInfo.head.ref;
       }
 
-      if (targetRef === '') {
-        targetRef = pullInfo.base.ref;
+      if (!benchmarkCommand.targetRef) {
+        benchmarkCommand.targetRef = pullInfo.base.ref;
       }
     }
 
     return {
-      benchmark: words[2],
+      benchmark: benchmarkCommand.benchmarkName,
+      verbose: benchmarkCommand.verbose,
       targetRepository: {
-        ref: targetRef,
+        ref: benchmarkCommand.targetRef!,
         url: targetSourceRepository.target,
       },
       sourceRepository: {
-        ref: sourceRef,
+        ref: benchmarkCommand.sourceRef!,
         url: targetSourceRepository.source,
       },
     };
