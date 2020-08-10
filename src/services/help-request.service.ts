@@ -1,15 +1,23 @@
 import { Context } from 'probot';
-import { HelpGeneratorService } from '../builder/help-generator.service';
+import { HelpGeneratorBuilder } from '../builder/help-generator.builder';
 
 export class HelpRequestService {
-  public constructor(private helpGenerator: HelpGeneratorService) {}
+  public constructor(private helpGenerator: HelpGeneratorBuilder) {}
 
   public async postHelpComment(context: Context): Promise<any> {
-    const help = context.issue({
-      body: this.helpGenerator.generate(context.payload.sender.login),
+    const help = this.helpGenerator
+      .withDefaultHeader(context.payload.sender.login)
+      .withCommands()
+      .withAdditionalBenchmarkInfo()
+      .withBenchmarkSamples()
+      .withListOfBenchmarks()
+      .build();
+
+    const helpComment = context.issue({
+      body: help,
     });
 
-    await context.github.issues.createComment(help);
+    await context.github.issues.createComment(helpComment);
 
     return;
   }

@@ -1,5 +1,5 @@
 import { Application } from 'probot';
-import { HelpGeneratorService } from './builder';
+import { HelpGeneratorBuilder } from './builder';
 import { BENCHMARK_COMMAD, HELP_COMMAND, UNKNWON_COMMAND } from './constants';
 import { autobotRequest } from './guards/guard.functions';
 import { extractCommand } from './helper/command.extractor';
@@ -48,7 +48,7 @@ export = (app: Application) => {
 
     if (command === HELP_COMMAND) {
       const helpRequestService = new HelpRequestService(
-        new HelpGeneratorService()
+        new HelpGeneratorBuilder()
       );
       await helpRequestService.postHelpComment(context);
       return;
