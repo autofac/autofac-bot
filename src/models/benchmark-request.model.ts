@@ -4,4 +4,5 @@ export interface BenchmarkRequest {
   targetRepository: Repository;
   sourceRepository: Repository;
   benchmark: string;
+  verbose: boolean;
 }

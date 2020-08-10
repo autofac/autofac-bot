@@ -3,6 +3,7 @@ import { HelpGeneratorBuilder } from './builder';
 import { BENCHMARK_COMMAD, HELP_COMMAND, UNKNWON_COMMAND } from './constants';
 import { autobotRequest } from './guards/guard.functions';
 import { extractCommand } from './helper/command.extractor';
+import { BenchmarkCommandParser } from './parser';
 import {
   BenchmarkNotificationsService,
   BenchmarkRequesterService,
@@ -59,8 +60,9 @@ export = (app: Application) => {
     }
 
     const benchmarkRequestService = new BenchmarkRequesterService(
-      new BenchmarkNotificationsService(),
       new BenchmarkRequestValidation(),
+      new BenchmarkCommandParser(),
+      new BenchmarkNotificationsService(),
       new IssueInfoLoaderService()
     );
 
